@@ -1,0 +1,36 @@
+{
+ "app": "exotica-sales-pricing",
+ "products": [
+  {
+   "id": "03n06q082r76jsjhe0ac",
+   "name": "Megatonic 250ml",
+   "cost": 455,
+   "dealer": 25,
+   "srp": 80,
+   "disc1": 10,
+   "disc2": 15,
+   "rival": 0,
+   "createdAt": 1791584945232
+  },
+  {
+   "id": "megatonic-1l",
+   "name": "Megatonic 1L (foliar fertilizer)",
+   "cost": 1860,
+   "dealer": 75,
+   "srp": 100,
+   "disc1": 10,
+   "disc2": 15,
+   "rival": 0,
+   "createdAt": 1791581300000
+  },
+  {
+   "id": "supreme-starter",
+   "name": "Supreme Starter (hog feeds)",
+   "cost": 2145,
+   "dealer": 50,
+   "srp": 80,
+   "rival": 0,
+   "createdAt": 1791581300001
+  }
+ ]
+}

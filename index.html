@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="hil">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Exotica Pricing</title>
+<meta name="description" content="Sales pricing sang Exotica Agrivet Trading OPC: SRP, dealer's price kag porsyento sang tubo.">
+<meta name="theme-color" content="#14633e">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Exotica Pricing">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&display=swap">
+<style>
+/* Layout: one narrow ledger column. Add-form on top, then one card per product:
+   puhunan, then two price tiers (dealer, SRP) each with linked tubo / % / presyo,
+   then a box to test the neighbour store's price against the same puhunan. */
+:root {
+  --bg: #edf2ec;
+  --surface: #fbfdfb;
+  --sunk: #e3eae2;
+  --ink: #14261e;
+  --muted: #56675d;
+  --line: #c9d5cb;
+  --accent: #1d4fd0;
+  --accent-ink: #ffffff;
+  --good: #197a4b;
+  --good-bg: #d9f0e2;
+  --warn: #8a5a00;
+  --warn-bg: #f6e7c4;
+  --bad: #b3261e;
+  --bad-bg: #f8dcd9;
+  --display: "Bricolage Grotesque", "Trebuchet MS", "Segoe UI", sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1713; --surface: #18231d; --sunk: #111a15; --ink: #e6efe8; --muted: #98aa9f;
+    --line: #2f4037; --accent: #8fadff; --accent-ink: #0b1430;
+    --good: #63cf93; --good-bg: #173a29; --warn: #e6b65c; --warn-bg: #3d3013;
+    --bad: #f39087; --bad-bg: #45201d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1713; --surface: #18231d; --sunk: #111a15; --ink: #e6efe8; --muted: #98aa9f;
+  --line: #2f4037; --accent: #8fadff; --accent-ink: #0b1430;
+  --good: #63cf93; --good-bg: #173a29; --warn: #e6b65c; --warn-bg: #3d3013;
+  --bad: #f39087; --bad-bg: #45201d;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.page {
+  max-width: 44rem;
+  margin-inline: auto;
+  padding-inline: 16px;
+  padding-block: 28px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+h1 { font-size: clamp(1.9rem, 7vw, 2.6rem); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 1.2rem; font-weight: 700; }
+h3 { font-size: 1.05rem; font-weight: 700; }
+h3 small { font: 400 0.85rem/1.3 var(--body); color: var(--muted); letter-spacing: 0; margin-left: 4px; }
+p { margin: 0; }
+
+.top { display: flex; flex-direction: column; gap: 10px; }
+.brand { display: flex; align-items: center; gap: 14px; }
+.logo { width: 64px; height: 64px; flex: none; display: block; }
+.brand-text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.store { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.lede { color: var(--muted); max-width: 34rem; }
+.status-row { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; font-size: 0.9rem; color: var(--muted); min-height: 1.4em; }
+#save-status.is-error { color: var(--bad); font-weight: 700; }
+
+/* shared controls */
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field > span:first-child {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.box {
+  display: flex; align-items: center; gap: 3px;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 8px;
+  padding-inline: 9px; min-width: 0;
+}
+.box:focus-within { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 1px; }
+.box i { font-style: normal; color: var(--muted); font-weight: 700; }
+.box input {
+  flex: 1; min-width: 0; width: 100%;
+  border: 0; background: transparent; color: var(--ink);
+  font: 700 1.05rem/1.2 var(--body); font-variant-numeric: tabular-nums;
+  padding-block: 11px; outline: none;
+}
+.box input::placeholder { color: var(--muted); font-weight: 400; opacity: 0.75; }
+button {
+  font: 700 1rem/1 var(--body); border-radius: 8px; cursor: pointer;
+  border: 1.5px solid var(--line); background: var(--surface); color: var(--ink);
+  padding: 12px 16px;
+}
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:disabled { opacity: 0.55; cursor: default; }
+.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+/* add form */
+.add {
+  background: var(--sunk); border-radius: 12px; padding: 16px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.add-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.add-grid .wide { grid-column: 1 / -1; }
+.add-foot { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+#add-error { color: var(--bad); font-weight: 700; font-size: 0.95rem; }
+
+/* list */
+.list-head { display: flex; flex-direction: column; gap: 12px; }
+.list-title { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; justify-content: space-between; }
+#summary { color: var(--muted); font-size: 0.95rem; }
+#list { display: flex; flex-direction: column; gap: 16px; }
+.note {
+  border: 1.5px dashed var(--line); border-radius: 12px; padding: 22px 16px;
+  color: var(--muted); text-align: center;
+}
+
+.card {
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px;
+  padding: 14px; display: flex; flex-direction: column; gap: 12px;
+}
+.card-head { display: flex; gap: 10px; align-items: center; }
+.card-head .name {
+  flex: 1; min-width: 0; border: 0; border-bottom: 1.5px solid transparent; background: transparent; color: var(--ink);
+  font: 700 1.25rem/1.25 var(--display); padding: 4px 0; border-radius: 0; outline: none;
+}
+.card-head .name:hover { border-bottom-color: var(--line); }
+.card-head .name:focus { border-bottom-color: var(--accent); }
+.card-head button { padding: 8px 10px; font-size: 0.85rem; color: var(--muted); flex: none; }
+.card-head .yes { color: var(--bad); border-color: var(--bad); }
+.confirm { display: flex; gap: 6px; flex: none; }
+.cost-row { max-width: 14rem; }
+.cost-row .box { background: var(--bg); }
+
+.tier {
+  background: var(--bg); border-radius: 10px; padding: 12px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.trio { display: grid; grid-template-columns: 1fr 0.8fr 1.2fr; gap: 8px; }
+.out .box { border-color: var(--ink); }
+.out .box input { font-family: var(--display); font-size: 1.15rem; }
+.read { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-size: 0.95rem; }
+.pill {
+  font: 800 1.1rem/1 var(--display); font-variant-numeric: tabular-nums;
+  padding: 6px 10px; border-radius: 999px; flex: none;
+  background: var(--good-bg); color: var(--good);
+}
+.pill.is-zero { background: var(--warn-bg); color: var(--warn); }
+.pill.is-loss { background: var(--bad-bg); color: var(--bad); }
+.read-text { color: var(--muted); min-width: 0; }
+.alert { color: var(--warn); font-weight: 700; font-size: 0.95rem; }
+.gap-btn { align-self: flex-start; padding: 9px 12px; font-size: 0.9rem; }
+.haggle { display: flex; flex-direction: column; gap: 10px; border-top: 1.5px solid var(--line); padding-top: 10px; }
+.haggle h4 { margin: 0; font: 700 0.95rem/1.3 var(--body); }
+.disc { display: grid; grid-template-columns: 6.4rem 1fr; gap: 12px; align-items: end; }
+.disc-out { min-width: 0; display: flex; flex-direction: column; gap: 1px; font-variant-numeric: tabular-nums; }
+.disc-out b { font: 700 1.15rem/1.2 var(--display); }
+.disc-out span { color: var(--muted); font-size: 0.9rem; }
+.disc-out.is-loss span { color: var(--bad); font-weight: 700; }
+
+.rival {
+  border: 1.5px dashed var(--line); border-radius: 10px; padding: 12px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.rival .field { max-width: 14rem; }
+.rival .box { background: var(--bg); }
+
+/* formula */
+.formula { display: flex; flex-direction: column; gap: 12px; }
+.formula dl { margin: 0; display: grid; gap: 10px; }
+.formula dl > div { background: var(--sunk); border-radius: 10px; padding: 12px 14px; }
+.formula dt { font-weight: 700; }
+.formula dd { margin: 2px 0 0; color: var(--muted); font-variant-numeric: tabular-nums; }
+.formula dd strong { color: var(--ink); }
+
+@media (min-width: 620px) {
+  .add-grid { grid-template-columns: 2fr 1fr 1fr 1fr; }
+  .add-grid .wide { grid-column: auto; }
+  .card { padding: 18px; }
+  .tier { padding: 14px; }
+}
+
+.backup { display: flex; flex-direction: column; gap: 12px; }
+.filebtn { font: 700 1rem/1 var(--body); border-radius: 8px; cursor: pointer; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); padding: 12px 16px; display: inline-block; }
+.filebtn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.filebtn input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+#backup-msg { color: var(--muted); min-height: 1.4em; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main class="page">
+  <header class="top">
+    <div class="brand">
+      <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Logo sang Exotica Agrivet Trading OPC">
+        <rect width="512" height="512" rx="112" fill="#14633e"/>
+        <path d="M0 400 C120 340 300 430 512 350 V400 a112 112 0 0 1 -112 112 H112 A112 112 0 0 1 0 400 Z" fill="#0f4f31"/>
+        <g transform="rotate(-14 256 268)">
+          <g fill="#9be2b6">
+            <path d="M318 176 C310 120 340 78 392 66 C402 118 372 162 318 176 Z"/>
+            <path d="M306 176 C262 168 236 132 240 90 C284 96 312 132 306 176 Z"/>
+          </g>
+          <path d="M196 172 H388 a26 26 0 0 1 26 26 V342 a26 26 0 0 1 -26 26 H196 a26 26 0 0 1 -19 -8 L104 284 a20 20 0 0 1 0 -28 L177 180 a26 26 0 0 1 19 -8 Z" fill="#fbfdf8"/>
+          <circle cx="160" cy="270" r="17" fill="#14633e"/>
+          <g fill="none" stroke="#14633e" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M272 338 V206 H306 a41 41 0 0 1 0 82 H272" stroke-width="26"/>
+            <path d="M238 234 H368 M238 260 H368" stroke-width="11"/>
+          </g>
+        </g>
+      </svg>
+      <div class="brand-text">
+        <p class="store">Exotica Agrivet Trading OPC</p>
+        <h1>Presyo kag Tubo</h1>
+      </div>
+    </div>
+    <p class="lede">Ibutang ang puhunan, dayon ang tubo para sa dealer kag para sa SRP. Automatic nga magguwa ang duha ka presyo kag kung pila ka porsyento ang tubo mo sa kada isa.</p>
+    <p class="status-row"><span id="save-status" role="status" aria-live="polite"></span><span id="where-note"></span></p>
+  </header>
+
+  <form class="add" id="add-form" novalidate>
+    <h2>Magdugang sang produkto</h2>
+    <div class="add-grid">
+      <label class="field wide"><span>Ngalan sang produkto</span>
+        <span class="box"><input id="add-name" type="text" autocomplete="off" placeholder="Halimbawa: Megatonic 1L"></span></label>
+      <label class="field"><span>Puhunan</span>
+        <span class="box"><i>₱</i><input id="add-cost" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></span></label>
+      <label class="field"><span>Tubo dealer</span>
+        <span class="box"><i>₱</i><input id="add-dealer" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></span></label>
+      <label class="field"><span>Tubo SRP</span>
+        <span class="box"><i>₱</i><input id="add-srp" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></span></label>
+    </div>
+    <div class="add-foot">
+      <button class="primary" id="add-btn" type="submit" disabled>Idugang</button>
+      <span id="add-error" role="alert"></span>
+    </div>
+  </form>
+
+  <section class="list-head" aria-label="Lista sang produkto">
+    <div class="list-title">
+      <h2>Mga produkto mo</h2>
+      <span id="summary"></span>
+    </div>
+    <label class="field" id="search-wrap" hidden><span>Pangitaa</span>
+      <span class="box"><input id="search" type="search" autocomplete="off" placeholder="I-type ang ngalan sang produkto"></span></label>
+    <div id="list"></div>
+    <p class="note" id="note">Ginakarga ang imo mga produkto…</p>
+  </section>
+
+  <section class="formula">
+    <h2>Ang formula</h2>
+    <p class="lede">Pareho ang formula sa dealer's price kag sa SRP. Ang puhunan pareho, ang tubo lang ang lain. Halimbawa ang Megatonic 1L mo: puhunan ₱1,860, gindugangan sang ₱100.</p>
+    <dl>
+      <div><dt>Presyo = Puhunan + Tubo</dt><dd>1,860 + 100 = <strong>₱1,960</strong></dd></div>
+      <div><dt>Tubo % sang puhunan = Tubo ÷ Puhunan × 100</dt><dd>100 ÷ 1,860 × 100 = <strong>5.38%</strong>. Amo ini ang numero sa sulod sang lingin.</dd></div>
+      <div><dt>Tubo % sang presyo = Tubo ÷ Presyo × 100</dt><dd>100 ÷ 1,960 × 100 = <strong>5.10%</strong>. Sa kada ₱100 nga mabaligya, ₱5.10 ang imo.</dd></div>
+      <div><dt>SRP nga may discount: Presyo = SRP − Discount, Tubo = Tubo sa SRP − Discount</dt><dd>Discount nga ₱10: 1,960 − 10 = <strong>₱1,950</strong>, tubo 100 − 10 = <strong>₱90</strong> (4.84%). Discount nga ₱15 sa suki: <strong>₱1,945</strong>, tubo <strong>₱85</strong> (4.57%).</dd></div>
+      <div><dt>Kung sundon ang presyo sang kontra: Tubo = Presyo nila − Puhunan mo</dt><dd>Kung ₱1,900 ang ila: 1,900 − 1,860 = <strong>₱40</strong> na lang ang tubo mo. Kung manubo pa sa ₱1,860, lugi na.</dd></div>
+    </dl>
+    <p class="lede">Ang tubo diri wala pa nabuhinan sang gastos sa tindahan (arkila, sweldo, kuryente, pletehan).</p>
+  </section>
+
+  <section class="backup">
+    <h2>Backup sang lista</h2>
+    <p class="lede">Sa sini lang nga cellphone naka-save ang lista. Mag-download sang backup kada may bag-o ka nga ginbutang, para mabalik mo kung madula ukon mag-ilis ka sang cellphone.</p>
+    <div class="add-foot">
+      <button type="button" id="backup-save">I-download ang backup</button>
+      <label class="filebtn">Ibalik halin sa backup<input type="file" id="backup-file" accept="application/json,.json"></label>
+    </div>
+    <p id="backup-msg" role="status" aria-live="polite"></p>
+  </section>
+</main>
+
+<script>
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  var listEl = $('#list'), noteEl = $('#note'), statusEl = $('#save-status'), whereEl = $('#where-note');
+  var summaryEl = $('#summary'), searchEl = $('#search'), searchWrap = $('#search-wrap');
+  var addForm = $('#add-form'), addBtn = $('#add-btn'), addErr = $('#add-error');
+  var LOCAL_KEY = 'sales-pricing-products';
+  var TIERS = ['dealer', 'srp'];
+
+  var products = new Map();   // id -> {id, name, cost, dealer, srp, rival, createdAt}; dealer/srp = tubo sa pesos
+  var cards = new Map();
+  var timers = new Map(), chains = new Map(), dirty = new Set(), deleting = new Set();
+  var db = null, mode = 'loading', loaded = false;
+
+  /* ---------- the math ---------- */
+  function num(v) {
+    if (typeof v === 'number') return isFinite(v) ? v : 0;
+    var n = parseFloat(String(v == null ? '' : v).replace(/[^0-9.\-]/g, ''));
+    return isFinite(n) ? n : 0;
+  }
+  function r2(x) { return Math.round((x + Number.EPSILON) * 100) / 100; }
+  function calc(cost, profit) {
+    var price = r2(cost + profit);
+    return {
+      price: price,
+      markup: cost > 0 ? profit / cost * 100 : null,   // tubo ÷ puhunan
+      margin: price > 0 ? profit / price * 100 : null  // tubo ÷ presyo
+    };
+  }
+  function peso(x) {
+    var neg = x < 0, a = Math.abs(x);
+    return (neg ? '−₱' : '₱') + a.toLocaleString('en-PH', { minimumFractionDigits: Number.isInteger(a) ? 0 : 2, maximumFractionDigits: 2 });
+  }
+  function pct(x) { return x == null ? '—' : x.toFixed(2).replace('-', '−') + '%'; }
+  function plain(x) { return String(r2(x)); }
+
+  /* ---------- status ---------- */
+  function setStatus(kind, text) {
+    statusEl.className = kind === 'error' ? 'is-error' : '';
+    statusEl.textContent = text || (kind === 'saving' ? 'Gina-save…' : kind === 'saved' ? 'Na-save na ang lista.' : '');
+  }
+
+  /* ---------- cards ---------- */
+  var DEALER_GAP = 25;   // sub-dealers: kasagaran ₱25 nga mas manubo sa SRP
+  function discHtml(d, label) {
+    return '<div class="disc">' +
+      '<label class="field"><span>' + label + '</span><span class="box"><i>−₱</i><input data-f="' + d + '" type="text" inputmode="decimal" autocomplete="off"></span></label>' +
+      '<p class="disc-out" data-d="' + d + '"><b></b><span></span></p>' +
+    '</div>';
+  }
+  var GAP_HTML = '<button type="button" class="gap-btn">Himua nga SRP less ₱' + DEALER_GAP + '</button>';
+  var HAGGLE_HTML = '<div class="haggle"><h4>Kung may hangyo ang end user</h4>' +
+    discHtml('disc1', 'Kasagaran') + discHtml('disc2', 'Suki') + '</div>';
+
+  function tierHtml(t, title, hint, extra) {
+    return '<section class="tier" data-t="' + t + '">' +
+      '<h3>' + title + '<small>' + hint + '</small></h3>' +
+      '<div class="trio">' +
+        '<label class="field"><span>Tubo</span><span class="box"><i>₱</i><input data-f="' + t + '-profit" type="text" inputmode="decimal" autocomplete="off"></span></label>' +
+        '<label class="field"><span>Tubo %</span><span class="box"><input data-f="' + t + '-pct" type="text" inputmode="decimal" autocomplete="off"><i>%</i></span></label>' +
+        '<label class="field out"><span>Presyo</span><span class="box"><i>₱</i><input data-f="' + t + '-price" type="text" inputmode="decimal" autocomplete="off"></span></label>' +
+      '</div>' +
+      '<p class="read"><span class="pill"></span><span class="read-text"></span></p>' +
+      (extra || '') +
+    '</section>';
+  }
+  var CARD_HTML =
+    '<div class="card-head">' +
+      '<input class="name" type="text" autocomplete="off" aria-label="Ngalan sang produkto">' +
+      '<button type="button" class="del">Dulaon</button>' +
+      '<span class="confirm" hidden><button type="button" class="yes">Huo, dulaon</button><button type="button" class="no">Indi</button></span>' +
+    '</div>' +
+    '<label class="field cost-row"><span>Puhunan</span><span class="box"><i>₱</i><input data-f="cost" type="text" inputmode="decimal" autocomplete="off"></span></label>' +
+    tierHtml('srp', 'SRP', 'para sa end user', HAGGLE_HTML) +
+    tierHtml('dealer', "Dealer's price", 'para sa sub-dealer', GAP_HTML) +
+    '<p class="alert" hidden>Tan-awa: mas mahal ang dealer\'s price sangsa SRP.</p>' +
+    '<section class="rival">' +
+      '<label class="field"><span>Presyo sang kontra</span><span class="box"><i>₱</i><input data-f="rival" type="text" inputmode="decimal" autocomplete="off" placeholder="wala pa"></span></label>' +
+      '<p class="read"><span class="pill" hidden></span><span class="read-text"></span></p>' +
+    '</section>';
+
+  var FIELDS = ['cost', 'dealer-profit', 'dealer-pct', 'dealer-price', 'srp-profit', 'srp-pct', 'srp-price', 'disc1', 'disc2', 'rival'];
+  var DISCS = ['disc1', 'disc2'];
+
+  function createCard(id) {
+    var el = document.createElement('article');
+    el.className = 'card';
+    el.innerHTML = CARD_HTML;
+    var c = { el: el, name: el.querySelector('.name'), in: {}, tier: {},
+      alert: el.querySelector('.alert'),
+      rivalPill: el.querySelector('.rival .pill'), rivalText: el.querySelector('.rival .read-text'),
+      del: el.querySelector('.del'), confirm: el.querySelector('.confirm') };
+    c.name.id = 'name-' + id;
+    FIELDS.forEach(function (f) { c.in[f] = el.querySelector('[data-f="' + f + '"]'); c.in[f].id = f + '-' + id; });
+    TIERS.forEach(function (t) {
+      var s = el.querySelector('.tier[data-t="' + t + '"]');
+      c.tier[t] = { pill: s.querySelector('.pill'), text: s.querySelector('.read-text') };
+    });
+    c.haggle = el.querySelector('.haggle');
+    c.disc = {};
+    DISCS.forEach(function (d) { c.disc[d] = el.querySelector('[data-d="' + d + '"]'); });
+    c.gap = el.querySelector('.gap-btn');
+    c.gap.addEventListener('click', function () {
+      var p = products.get(id);
+      if (!p) return;
+      p.dealer = r2(p.srp - DEALER_GAP);
+      paint(id); summarize(); scheduleSave(id);
+    });
+
+    el.addEventListener('input', function (e) {
+      var t = e.target;
+      if (t === c.name) edit(id, 'name', t.value);
+      else if (t.dataset && t.dataset.f) edit(id, t.dataset.f, t.value);
+    });
+    el.addEventListener('focusout', function () { setTimeout(function () { paint(id); }, 0); });
+    el.addEventListener('focusin', function (e) { if (e.target.dataset && e.target.dataset.f) e.target.select(); });
+    c.del.addEventListener('click', function () { c.del.hidden = true; c.confirm.hidden = false; c.confirm.querySelector('.no').focus(); });
+    c.confirm.querySelector('.no').addEventListener('click', function () { c.confirm.hidden = true; c.del.hidden = false; c.del.focus(); });
+    c.confirm.querySelector('.yes').addEventListener('click', function () { remove(id); });
+    return c;
+  }
+
+  function setIfIdle(input, value) { if (input !== document.activeElement && input.value !== value) input.value = value; }
+  function pillClass(profit) { return 'pill' + (profit < 0 ? ' is-loss' : profit === 0 ? ' is-zero' : ''); }
+
+  function paint(id) {
+    var p = products.get(id), c = cards.get(id);
+    if (!p || !c) return;
+    setIfIdle(c.name, p.name);
+    setIfIdle(c.in.cost, plain(p.cost));
+
+    TIERS.forEach(function (t) {
+      var profit = p[t], k = calc(p.cost, profit), v = c.tier[t];
+      setIfIdle(c.in[t + '-profit'], plain(profit));
+      setIfIdle(c.in[t + '-pct'], k.markup == null ? '' : plain(k.markup));
+      setIfIdle(c.in[t + '-price'], plain(k.price));
+      v.pill.className = pillClass(profit);
+      v.pill.textContent = pct(k.markup);
+      v.text.textContent = p.cost <= 0 ? 'Ibutang anay ang puhunan.'
+        : profit < 0 ? 'Lugi ka sang ' + peso(-profit) + ' kada isa.'
+        : profit === 0 ? 'Wala pa tubo. Ibutang kung pila ang idugang mo.'
+        : 'sang puhunan · ' + pct(k.margin) + ' sang presyo' +
+          (t === 'dealer' && p.srp > profit ? ' · mas manubo sang ' + peso(r2(p.srp - profit)) + ' sa SRP' : '');
+    });
+
+    c.alert.hidden = !(p.srp > 0 && p.dealer > p.srp);
+    c.gap.hidden = !(p.srp > 0) || p.dealer === r2(p.srp - DEALER_GAP);
+
+    // SRP nga may discount: presyo = SRP − discount, tubo = tubo sa SRP − discount
+    c.haggle.hidden = !(p.srp > 0);
+    DISCS.forEach(function (d) {
+      var left = r2(p.srp - p[d]), dk = calc(p.cost, left), o = c.disc[d];
+      setIfIdle(c.in[d], plain(p[d]));
+      o.className = 'disc-out' + (left < 0 ? ' is-loss' : '');
+      o.firstChild.textContent = peso(dk.price);
+      o.lastChild.textContent = left < 0 ? 'lugi ka sang ' + peso(-left) + ' kada isa'
+        : left === 0 ? 'wala na tubo, balik puhunan lang'
+        : 'tubo ' + peso(left) + ' · ' + pct(dk.markup) + ' sang puhunan';
+    });
+
+    setIfIdle(c.in.rival, p.rival > 0 ? plain(p.rival) : '');
+    if (!(p.rival > 0)) {
+      c.rivalPill.hidden = true;
+      c.rivalText.textContent = 'I-type ang presyo sang tapad nga tindahan para makita kung may tubo ka pa kung sundon mo.';
+    } else {
+      var rp = r2(p.rival - p.cost), rk = calc(p.cost, rp);
+      c.rivalPill.hidden = false;
+      c.rivalPill.className = pillClass(rp);
+      c.rivalPill.textContent = pct(rk.markup);
+      c.rivalText.textContent = rp < 0 ? 'Kung sundon mo ang ' + peso(p.rival) + ', lugi ka sang ' + peso(-rp) + ' kada isa.'
+        : rp === 0 ? 'Kung sundon mo ang ' + peso(p.rival) + ', balik puhunan lang, wala tubo.'
+        : 'Kung sundon mo ang ' + peso(p.rival) + ', ' + peso(rp) + ' ang tubo mo kada isa.';
+    }
+  }
+
+  function edit(id, field, value) {
+    var p = products.get(id);
+    if (!p) return;
+    if (field === 'name') p.name = value;
+    else {
+      var v = num(value), dash = field.indexOf('-');
+      if (field === 'cost') p.cost = v;
+      else if (field === 'rival') p.rival = v > 0 ? v : 0;
+      else if (field === 'disc1' || field === 'disc2') p[field] = v > 0 ? v : 0;
+      else {
+        var t = field.slice(0, dash), kind = field.slice(dash + 1);
+        if (kind === 'profit') p[t] = v;
+        else if (kind === 'pct') p[t] = r2(p.cost * v / 100);
+        else if (kind === 'price') p[t] = r2(v - p.cost);
+      }
+    }
+    paint(id);
+    summarize();
+    scheduleSave(id);
+  }
+
+  /* ---------- list ---------- */
+  function render() {
+    var q = searchEl.value.trim().toLowerCase();
+    var ids = Array.from(products.values()).sort(function (a, b) {
+      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) || a.createdAt - b.createdAt;
+    }).map(function (p) { return p.id; });
+
+    cards.forEach(function (c, id) { if (!products.has(id)) { c.el.remove(); cards.delete(id); } });
+
+    var focusInside = listEl.contains(document.activeElement);
+    var ref = listEl.firstElementChild, shown = 0;
+    ids.forEach(function (id) {
+      var c = cards.get(id);
+      if (!c) { c = createCard(id); cards.set(id, c); listEl.insertBefore(c.el, ref); }
+      else if (c.el === ref) { ref = ref.nextElementSibling; }
+      else if (!focusInside) { listEl.insertBefore(c.el, ref); }
+      paint(id);
+      var hide = !!q && products.get(id).name.toLowerCase().indexOf(q) === -1;
+      c.el.hidden = hide;
+      if (!hide) shown++;
+    });
+
+    searchWrap.hidden = products.size < 5 && !q;
+    if (!loaded) { noteEl.hidden = false; noteEl.textContent = 'Ginakarga ang imo mga produkto…'; }
+    else if (products.size === 0) { noteEl.hidden = false; noteEl.textContent = 'Wala pa produkto diri. Ibutang ang ngalan kag puhunan sa ibabaw, dayon pinduta ang "Idugang".'; }
+    else if (shown === 0) { noteEl.hidden = false; noteEl.textContent = 'Wala sang produkto nga may "' + searchEl.value.trim() + '" sa ngalan.'; }
+    else noteEl.hidden = true;
+    summarize();
+  }
+
+  function summarize() {
+    var n = 0, parts = [];
+    var acc = { dealer: [0, 0], srp: [0, 0] };
+    products.forEach(function (p) {
+      n++;
+      TIERS.forEach(function (t) {
+        var k = calc(p.cost, p[t]);
+        if (k.markup != null && p[t] !== 0) { acc[t][0] += k.markup; acc[t][1]++; }
+      });
+    });
+    if (acc.dealer[1]) parts.push('dealer ' + pct(acc.dealer[0] / acc.dealer[1]));
+    if (acc.srp[1]) parts.push('SRP ' + pct(acc.srp[0] / acc.srp[1]));
+    summaryEl.textContent = !n ? '' : n + ' ka produkto' + (parts.length ? ' · average nga tubo: ' + parts.join(', ') : '');
+  }
+
+  /* ---------- saving ---------- */
+  function persistLocal() {
+    try { localStorage.setItem(LOCAL_KEY, JSON.stringify(Array.from(products.values()))); return true; }
+    catch (e) { return false; }
+  }
+  function scheduleSave(id) {
+    dirty.add(id);
+    clearTimeout(timers.get(id));
+    timers.set(id, setTimeout(function () { timers.delete(id); save(id); }, 600));
+  }
+  function fail(e) {
+    var code = e && e.code;
+    setStatus('error', code === 'invalid_argument'
+      ? 'Indi ka makabag-o sang lista sa sini nga account. Ang tag-iya lang ang maka-save.'
+      : code === 'quota_exceeded' ? 'Puno na ang lista. Magdula anay sang iban nga produkto.'
+      : 'Wala na-save. Tan-awa ang internet mo, dayon bag-uha liwat ang numero.');
+  }
+  function save(id) {
+    var p = products.get(id);
+    if (!p) return;
+    if (mode === 'local') {
+      dirty.delete(id);
+      if (persistLocal()) setStatus('saved'); else setStatus('error', 'Indi maka-save sa sini nga browser.');
+      return;
+    }
+    if (mode !== 'db') return;
+    var body = { name: p.name, cost: p.cost, dealer: p.dealer, srp: p.srp, disc1: p.disc1, disc2: p.disc2, rival: p.rival, createdAt: p.createdAt };
+    setStatus('saving');
+    var prev = chains.get(id) || Promise.resolve();
+    var next = prev.then(function () { return db.collection('products').doc(id).set(body); }).then(function () {
+      if (!timers.has(id)) dirty.delete(id);
+      setStatus('saved');
+    }, fail);
+    chains.set(id, next);
+  }
+  function remove(id) {
+    clearTimeout(timers.get(id)); timers.delete(id); dirty.delete(id);
+    products.delete(id);
+    render();
+    if (mode === 'local') { persistLocal(); setStatus('saved', 'Gindula na.'); return; }
+    if (mode !== 'db') return;
+    deleting.add(id);
+    setStatus('saving');
+    var prev = chains.get(id) || Promise.resolve();
+    chains.set(id, prev.then(function () { return db.collection('products').doc(id).delete(); }).then(function () {
+      deleting.delete(id); setStatus('saved', 'Gindula na.');
+    }, function (e) { deleting.delete(id); fail(e); }));
+  }
+
+  /* ---------- add ---------- */
+  addForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (mode === 'loading') return;
+    var name = $('#add-name').value.trim(), cost = num($('#add-cost').value);
+    var dealerRaw = $('#add-dealer').value.trim(), srpRaw = $('#add-srp').value.trim();
+    if (!name) { addErr.textContent = 'Ibutang ang ngalan sang produkto.'; $('#add-name').focus(); return; }
+    if (cost <= 0) { addErr.textContent = 'Ibutang ang puhunan (dapat mas dako sa 0).'; $('#add-cost').focus(); return; }
+    addErr.textContent = '';
+    var id = mode === 'db' ? db.collection('products').doc().id : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    products.set(id, { id: id, name: name, cost: r2(cost), dealer: r2(num(dealerRaw)), srp: r2(num(srpRaw)), disc1: 10, disc2: 15, rival: 0, createdAt: Date.now() });
+    dirty.add(id);
+    searchEl.value = '';
+    render();
+    save(id);
+    addForm.reset();
+    var c = cards.get(id);
+    if (c) {
+      try { c.el.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); } catch (err) {}
+      if (!dealerRaw) c.in['dealer-profit'].focus({ preventScroll: true });
+      else if (!srpRaw) c.in['srp-profit'].focus({ preventScroll: true });
+    }
+  });
+  searchEl.addEventListener('input', render);
+
+  /* ---------- data source ---------- */
+  function toProduct(id, x) {
+    x = x || {};
+    // Older entries kept one tubo as "profit": that one is the SRP tubo.
+    var srp = x.srp != null ? x.srp : x.profit;
+    var rival = num(x.rival);
+    return { id: id, name: String(x.name == null ? '' : x.name), cost: num(x.cost),
+      dealer: num(x.dealer), srp: num(srp),
+      disc1: x.disc1 == null ? 10 : Math.max(0, num(x.disc1)),   // kasagaran nga discount sa end user
+      disc2: x.disc2 == null ? 15 : Math.max(0, num(x.disc2)),   // pinakadako, para sa suki
+      rival: rival > 0 ? rival : 0, createdAt: num(x.createdAt) };
+  }
+  function onSnap(snap) {
+    var seen = new Set();
+    snap.docs.forEach(function (d) {
+      seen.add(d.id);
+      if (dirty.has(d.id) || deleting.has(d.id)) return;
+      products.set(d.id, toProduct(d.id, d.data()));
+    });
+    Array.from(products.keys()).forEach(function (id) { if (!seen.has(id) && !dirty.has(id)) products.delete(id); });
+    loaded = true;
+    render();
+  }
+  function useLocal() {
+    mode = 'local'; loaded = true;
+    try {
+      var raw = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]');
+      if (Array.isArray(raw)) raw.forEach(function (x) { if (x && x.id) products.set(String(x.id), toProduct(String(x.id), x)); });
+    } catch (e) {}
+    whereEl.textContent = 'Sa sini lang nga device naka-save ang lista.';
+    addBtn.disabled = false;
+    render();
+  }
+  function start() {
+    var p;
+    try { p = window.claude && typeof window.claude.use === 'function' ? window.claude.use('db') : null; } catch (e) { p = null; }
+    if (!p) { useLocal(); return; }
+    Promise.resolve(p).then(function (d) {
+      if (!d) { useLocal(); return; }
+      db = d; mode = 'db';
+      addBtn.disabled = false;
+      whereEl.textContent = 'Naka-save sa imo account, makita mo sa bisan diin nga device.';
+      db.collection('products').limit(1000).onSnapshot(onSnap, function () {
+        if (!loaded) { loaded = true; render(); }
+        setStatus('error', 'Wala makarga ang lista. I-refresh ang page.');
+      });
+    }, useLocal);
+  }
+
+  /* ---------- backup (sa cellphone lang naka-save ang lista) ---------- */
+  var bkMsg = $('#backup-msg');
+  $('#backup-save').addEventListener('click', function () {
+    var data = JSON.stringify({ app: 'exotica-sales-pricing', savedAt: new Date().toISOString(), products: Array.from(products.values()) }, null, 1);
+    var url = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+    var a = document.createElement('a');
+    a.href = url; a.download = 'exotica-pricing-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+    bkMsg.textContent = 'Na-download na ang backup (' + products.size + ' ka produkto). Tan-awa sa Downloads sang cellphone mo.';
+  });
+  $('#backup-file').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function () {
+      try {
+        var raw = JSON.parse(r.result), arr = Array.isArray(raw) ? raw : raw && raw.products, n = 0;
+        if (!Array.isArray(arr)) throw new Error('shape');
+        arr.forEach(function (x) { if (x && x.id != null) { products.set(String(x.id), toProduct(String(x.id), x)); n++; } });
+        var ok = persistLocal();
+        render();
+        bkMsg.textContent = ok ? n + ' ka produkto ang ginbalik halin sa backup.' : 'Nabasa ang backup pero indi ma-save sa sini nga browser.';
+      } catch (err) { bkMsg.textContent = 'Indi mabasa ang file. Pilia ang backup file nga gin-download halin diri.'; }
+      e.target.value = '';
+    };
+    r.readAsText(f);
+  });
+
+  render();
+  start();
+})();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('./sw.js').catch(function () {}); });
+}
+</script>
+
+</body>
+</html>

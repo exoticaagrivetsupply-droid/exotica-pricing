@@ -1,0 +1,32 @@
+{
+ "name": "Exotica Sales Pricing",
+ "short_name": "Exotica Pricing",
+ "description": "Sales pricing sang Exotica Agrivet Trading OPC",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#edf2ec",
+ "theme_color": "#14633e",
+ "lang": "hil",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon-maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}
