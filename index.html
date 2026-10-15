@@ -38,13 +38,14 @@ html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5;
   padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 [hidden] { display: none !important; }
-.page { max-width: 44rem; margin-inline: auto; padding-inline: 16px; padding-block: 20px 64px; display: flex; flex-direction: column; gap: 20px; }
+.page { max-width: 64rem; margin-inline: auto; padding-inline: 16px; padding-block: 20px 64px; display: flex; flex-direction: column; gap: 20px; }
 h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
 h1 { font-size: clamp(1.6rem, 6vw, 2.2rem); font-weight: 800; line-height: 1.05; }
 h2 { font-size: 1.25rem; font-weight: 700; }
 h3 { font-size: 1.05rem; font-weight: 700; }
 p { margin: 0; }
 .muted, .lede { color: var(--muted); }
+.lede, .panel, #screen-setup, #screen-login { max-width: 44rem; }
 
 .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 14px; }
 .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
@@ -131,6 +132,30 @@ button:disabled { opacity: 0.55; cursor: default; }
 .out.is-loss { color: var(--bad); font-weight: 700; }
 .savebar { position: sticky; bottom: 0; background: var(--bg); padding-block: 10px calc(10px + env(safe-area-inset-bottom, 0px)); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-top: 1.5px solid var(--line); }
 
+.tbl-wrap { overflow-x: auto; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); -webkit-overflow-scrolling: touch; }
+table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 760px; font-variant-numeric: tabular-nums; }
+th, td { padding: 10px 12px; text-align: right; border-bottom: 1px solid var(--line); vertical-align: top; white-space: nowrap; }
+thead th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); background: var(--sunk); position: sticky; top: 0; }
+tbody tr:last-child > * { border-bottom: 0; }
+th:first-child { text-align: left; position: sticky; left: 0; z-index: 1; background: var(--surface); white-space: normal; min-width: 9.5rem; max-width: 14rem; border-right: 1px solid var(--line); }
+thead th:first-child { background: var(--sunk); z-index: 2; }
+.tn { display: block; font: 700 1rem/1.25 var(--display); overflow-wrap: anywhere; }
+td b { display: block; font: 700 1.05rem/1.25 var(--display); }
+th small, td small { display: block; font-size: 0.8rem; color: var(--muted); font-weight: 400; }
+td.is-loss small.tp, small.is-loss { color: var(--bad); font-weight: 700; }
+td.is-zero small.tp { color: var(--warn); font-weight: 700; }
+th small.bad { color: var(--bad); font-weight: 700; }
+td.rv { min-width: 9rem; }
+td.rv .box { background: var(--bg); }
+td.rv input { padding-block: 7px; font-size: 0.95rem; }
+td.ap { text-align: left; min-width: 11rem; }
+.mks { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.mk { font-size: 0.78rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: var(--sunk); color: var(--muted); }
+.mk.ok { background: var(--good-bg); color: var(--good); }
+.thumb.sm { font-size: 0.95rem; padding: 9px 12px; }
+tr.done > * { background: var(--bg); }
+tr.done th:first-child { background: var(--bg); }
+.hint { font-size: 0.85rem; }
 @media (min-width: 620px) {
   .grid3 { grid-template-columns: 2fr 1fr 1fr; }
   .grid3 .wide { grid-column: auto; }
@@ -167,6 +192,8 @@ button:disabled { opacity: 0.55; cursor: default; }
         <textarea id="setup-cfg" rows="7" placeholder="const firebaseConfig = { apiKey: &quot;...&quot;, authDomain: &quot;...&quot;, projectId: &quot;...&quot;, ... };"></textarea></label>
       <label class="field"><span>Email mo</span><span class="box"><input id="setup-e1" type="email" autocomplete="email" placeholder="ikaw@gmail.com"></span></label>
       <label class="field"><span>Email sang partner mo</span><span class="box"><input id="setup-e2" type="email" autocomplete="off" placeholder="partner@gmail.com"></span></label>
+      <label class="field"><span>Email sang tender (pwede wala; kung madamo, butangi sang comma)</span><span class="box"><input id="setup-e3" type="text" autocomplete="off" placeholder="tender@gmail.com"></span></label>
+      <p class="lede">Ang tender maka-encode sang resibo kag makakita sang presyo, pero indi maka-approve.</p>
       <div class="row"><button type="button" class="primary" id="setup-save">I-save</button><span class="err" id="setup-err" role="alert"></span></div>
     </div>
     <div class="panel" id="setup-out" hidden>
@@ -174,8 +201,8 @@ button:disabled { opacity: 0.55; cursor: default; }
       <p class="lede">Kopyaha kag idikit sa Firebase: Firestore Database, dayon Rules, dayon Publish. Amo ini ang nagasiguro nga kamo lang nga duha ang makasulod, kag nga indi magsulod ang presyo kung indi kamo duha mag-approve.</p>
       <textarea id="rules-out" rows="8" readonly></textarea>
       <div class="row"><button type="button" id="copy-rules">Kopyaha ang rules</button></div>
-      <h3>Setup link para sa partner mo</h3>
-      <p class="lede">Ipadala ini sa partner mo (halimbawa sa Messenger). Pag-abri niya, indi na siya magdikit sang config. Gamita man ini sa iban mo nga cellphone ukon computer.</p>
+      <h3>Setup link para sa partner kag tender</h3>
+      <p class="lede">Ipadala ini sa partner kag tender mo (halimbawa sa Messenger). Pag-abri niya, indi na siya magdikit sang config. Gamita man ini sa iban mo nga cellphone ukon computer.</p>
       <label class="field"><span>Setup link</span><span class="box"><input id="link-out" type="text" readonly></span></label>
       <div class="row"><button type="button" id="copy-link">Kopyaha ang link</button></div>
       <div class="row"><button type="button" class="primary" id="setup-done">Padayon sa login</button></div>
@@ -185,7 +212,7 @@ button:disabled { opacity: 0.55; cursor: default; }
   <section id="screen-login" class="view" hidden>
     <div class="panel">
       <h2>Mag-login</h2>
-      <p class="lede">Ang duha lang ka partner ang makasulod: <b id="login-partners"></b></p>
+      <p class="lede">Ang makasulod lang: <b id="login-partners"></b></p>
       <label class="field"><span>Email</span><span class="box"><input id="login-email" type="email" autocomplete="username"></span></label>
       <label class="field"><span>Password</span><span class="box"><input id="login-pass" type="password" autocomplete="current-password"></span></label>
       <div class="row"><button type="button" class="primary" id="login-btn">Mag-login</button><button type="button" id="signup-btn">Himua ang account</button></div>
@@ -260,7 +287,7 @@ button:disabled { opacity: 0.55; cursor: default; }
   }
 
   /* ---------- state ---------- */
-  var S = { api: null, me: '', partners: [], products: [], byId: new Map(), invoices: [], loadedP: false, loadedI: false, view: 'products', openId: null, tried: new Set(), unsub: [] };
+  var S = { api: null, me: '', partners: [], products: [], byId: new Map(), invoices: [], items: {}, loadedP: false, loadedI: false, loadedT: false, view: 'products', openId: null, tried: new Set(), unsub: [] };
   var V = $('#view');
   var E = null; // invoice being edited
 
@@ -288,57 +315,64 @@ button:disabled { opacity: 0.55; cursor: default; }
   function b64e(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
   function b64d(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return JSON.parse(decodeURIComponent(escape(atob(s)))); }
   function setupLink(cfg) { return location.origin + location.pathname + '#setup=' + b64e(cfg); }
-  function rulesText(partners) {
-    var list = partners.map(function (e) { return "'" + e + "'"; }).join(', ');
+  function rulesText(partners, staff) {
+    var q = function (e) { return "'" + e + "'"; };
+    var list = partners.map(q).join(', '), staffList = (staff || []).map(q).join(', ');
     return [
 "rules_version = '2';",
 "service cloud.firestore {",
 "  match /databases/{database}/documents {",
 "    function partners() { return [" + list + "]; }",
+"    function staff() { return [" + staffList + "]; }",
 "    function me() { return request.auth.token.email; }",
 "    function isPartner() { return request.auth != null && request.auth.token.email in partners(); }",
+"    function isMember() { return request.auth != null && (request.auth.token.email in partners() || request.auth.token.email in staff()); }",
+"    function itemFields() { return ['name', 'qty', 'cost', 'srp', 'dealer', 'disc1', 'disc2', 'order', 'approvals', 'status', 'appliedAt']; }",
+"    function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }",
 "    function apprDiff() { return request.resource.data.approvals.diff(resource.data.approvals).affectedKeys(); }",
-"    function editOk() {",
-"      return request.resource.data.status == 'pending'",
-"        && request.resource.data.approvals.size() == 0",
-"        && request.resource.data.createdBy == resource.data.createdBy;",
+"    function freshItem() {",
+"      return request.resource.data.keys().hasOnly(itemFields())",
+"        && request.resource.data.status == 'pending'",
+"        && request.resource.data.approvals.size() == 0;",
 "    }",
-"    function approveOk() {",
-"      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['approvals'])",
-"        && apprDiff().hasOnly([me()]);",
-"    }",
+"    function approveOk() { return isPartner() && changed().hasOnly(['approvals']) && apprDiff().hasOnly([me()]); }",
 "    function applyOk() {",
-"      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['approvals', 'status', 'appliedAt'])",
-"        && apprDiff().hasOnly([me()])",
+"      return changed().hasOnly(['approvals', 'status', 'appliedAt'])",
+"        && (isPartner() ? apprDiff().hasOnly([me()]) : apprDiff().size() == 0)",
 "        && request.resource.data.status == 'applied'",
 "        && request.resource.data.appliedAt == request.time",
 "        && request.resource.data.approvals.keys().hasAll(partners());",
 "    }",
-"    function fromInvoice(pid) {",
-"      let inv = getAfter(/databases/$(database)/documents/invoices/$(request.resource.data.lastInvoice)).data;",
-"      let it = inv.items[pid];",
+"    function fromItem(pid) {",
+"      let it = getAfter(/databases/$(database)/documents/invoices/$(request.resource.data.lastInvoice)/items/$(pid)).data;",
 "      let p = request.resource.data;",
-"      return inv.status == 'applied'",
-"        && inv.appliedAt == request.time",
+"      return it.status == 'applied'",
+"        && it.appliedAt == request.time",
 "        && p.updatedAt == request.time",
-"        && inv.approvals.keys().hasAll(partners())",
+"        && it.approvals.keys().hasAll(partners())",
 "        && p.keys().hasOnly(['name', 'cost', 'srp', 'dealer', 'disc1', 'disc2', 'lastInvoice', 'updatedAt'])",
 "        && p.name == it.name && p.cost == it.cost && p.srp == it.srp",
 "        && p.dealer == it.dealer && p.disc1 == it.disc1 && p.disc2 == it.disc2;",
 "    }",
-"    match /invoices/{id} {",
-"      allow read: if isPartner();",
-"      allow create: if isPartner()",
-"        && request.resource.data.status == 'pending'",
-"        && request.resource.data.approvals.size() == 0",
-"        && request.resource.data.createdBy == me();",
-"      allow update: if isPartner() && resource.data.status == 'pending'",
-"        && (editOk() || approveOk() || applyOk());",
-"      allow delete: if isPartner() && resource.data.status == 'pending';",
+"    match /invoices/{iid} {",
+"      allow read: if isMember();",
+"      allow create: if isMember() && request.resource.data.createdBy == me();",
+"      allow update: if isMember() && request.resource.data.createdBy == resource.data.createdBy;",
+"      allow delete: if isPartner() || (isMember() && resource.data.createdBy == me());",
+"      match /items/{pid} {",
+"        allow read: if isMember();",
+"        allow create: if isMember() && freshItem();",
+"        allow update: if isMember() && resource.data.status == 'pending'",
+"          && (freshItem() || approveOk() || applyOk());",
+"        allow delete: if isMember() && resource.data.status == 'pending';",
+"      }",
+"    }",
+"    match /{path=**}/items/{pid} {",
+"      allow read: if isMember();",
 "    }",
 "    match /products/{pid} {",
-"      allow read: if isPartner();",
-"      allow create, update: if isPartner() && fromInvoice(pid);",
+"      allow read: if isMember();",
+"      allow create, update: if isMember() && fromItem(pid);",
 "    }",
 "  }",
 "}"].join('\n');
@@ -350,24 +384,27 @@ button:disabled { opacity: 0.55; cursor: default; }
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
   }
   function fillSetupOut(cfg) {
-    $('#rules-out').value = rulesText(cfg.partners);
+    $('#rules-out').value = rulesText(cfg.partners, cfg.staff);
     $('#link-out').value = setupLink(cfg);
     $('#setup-out').hidden = false;
   }
   function showSetup(cfg) {
     showScreen('setup');
-    if (cfg) { $('#setup-e1').value = cfg.partners[0] || ''; $('#setup-e2').value = cfg.partners[1] || ''; fillSetupOut(cfg); }
+    if (cfg) { $('#setup-e1').value = cfg.partners[0] || ''; $('#setup-e2').value = cfg.partners[1] || ''; $('#setup-e3').value = (cfg.staff || []).join(', '); fillSetupOut(cfg); }
   }
   $('#setup-save').addEventListener('click', function () {
     var fb = parseConfig($('#setup-cfg').value), old = lsGet(CFG_KEY, null);
     if (!fb && old) fb = old.firebase;
     var e1 = $('#setup-e1').value.trim().toLowerCase(), e2 = $('#setup-e2').value.trim().toLowerCase();
+    var staffIn = $('#setup-e3').value.split(/[,;\s]+/).map(function (x) { return x.trim().toLowerCase(); }).filter(Boolean);
     var bad = !fb ? 'Indi mabasa ang Firebase config. Kopyaha ang bug-os nga firebaseConfig halin sa Firebase.'
       : !/^\S+@\S+\.\S+$/.test(e1) || !/^\S+@\S+\.\S+$/.test(e2) ? 'Isulat ang husto nga email ninyo nga duha.'
-      : e1 === e2 ? 'Dapat lain ang email sang partner mo.' : '';
+      : e1 === e2 ? 'Dapat lain ang email sang partner mo.'
+      : staffIn.some(function (x) { return !/^\S+@\S+\.\S+$/.test(x); }) ? 'Sala ang porma sang email sang tender.'
+      : staffIn.some(function (x) { return x === e1 || x === e2; }) ? 'Ang tender dapat lain nga email sa partners.' : '';
     $('#setup-err').textContent = bad;
     if (bad) return;
-    var cfg = { firebase: fb, partners: [e1, e2] };
+    var cfg = { firebase: fb, partners: [e1, e2], staff: staffIn };
     lsSet(CFG_KEY, cfg);
     fillSetupOut(cfg);
     $('#setup-out').scrollIntoView({ block: 'start' });
@@ -385,7 +422,7 @@ button:disabled { opacity: 0.55; cursor: default; }
   /* ---------- login ---------- */
   function showLogin(cfg, msg) {
     showScreen('login');
-    $('#login-partners').textContent = cfg.partners.join(' kag ');
+    $('#login-partners').textContent = cfg.partners.join(', ') + ' (partners)' + ((cfg.staff || []).length ? ', ' + cfg.staff.join(', ') + ' (tender)' : '');
     $('#login-err').textContent = msg || '';
   }
   function authMsg(e) {
@@ -401,7 +438,8 @@ button:disabled { opacity: 0.55; cursor: default; }
   }
   function doAuth(create) {
     var cfg = lsGet(CFG_KEY, null), email = $('#login-email').value.trim().toLowerCase(), pass = $('#login-pass').value;
-    if (cfg.partners.indexOf(email) < 0) { $('#login-err').textContent = 'Ang email dapat isa sa: ' + cfg.partners.join(', ') + '.'; return; }
+    var members = cfg.partners.concat(cfg.staff || []);
+    if (members.indexOf(email) < 0) { $('#login-err').textContent = 'Ang email dapat isa sa: ' + members.join(', ') + '.'; return; }
     $('#login-err').textContent = '';
     var a = firebase.auth();
     (create ? a.createUserWithEmailAndPassword(email, pass) : a.signInWithEmailAndPassword(email, pass))
@@ -412,42 +450,57 @@ button:disabled { opacity: 0.55; cursor: default; }
   $('#login-pass').addEventListener('keydown', function (e) { if (e.key === 'Enter') doAuth(false); });
   $('#logout').addEventListener('click', function () { if (S.api) S.api.signOut(); });
 
-  /* ---------- Firebase data layer ---------- */
+  /* ---------- Firebase data layer ----------
+     invoices/{id}            = header (supplier, invoiceNo, date, createdBy, createdAt)
+     invoices/{id}/items/{pid} = one product line with its own approvals and status
+     products/{pid}           = official price, written only when both partners approved that line */
   function makeFirebaseApi(db, me, partners) {
     var FV = firebase.firestore.FieldValue, FP = firebase.firestore.FieldPath;
     var TS = function () { return FV.serverTimestamp(); };
     var inv = db.collection('invoices'), prod = db.collection('products');
-    function rows(s) { return s.docs.map(function (d) { var x = d.data({ serverTimestamps: 'estimate' }); x.id = d.id; return x; }); }
+    var isP = partners.indexOf(me) >= 0;
+    function rows(s, withParent) {
+      return s.docs.map(function (d) { var x = d.data({ serverTimestamps: 'estimate' }); x.id = d.id; if (withParent) x.iid = d.ref.parent.parent.id; return x; });
+    }
+    function itemRef(iid, pid) { return inv.doc(iid).collection('items').doc(pid); }
     return {
       me: me, partners: partners,
       newProductId: function () { return prod.doc().id; },
       newInvoiceId: function () { return inv.doc().id; },
       onProducts: function (cb, err) { return prod.onSnapshot(function (s) { cb(rows(s)); }, err); },
       onInvoices: function (cb, err) { return inv.onSnapshot(function (s) { cb(rows(s)); }, err); },
-      saveInvoice: function (id, data, old) {
-        return inv.doc(id).set(Object.assign({}, data, {
-          status: 'pending', approvals: {}, createdBy: old ? old.createdBy : me,
-          createdAt: old && old.createdAt ? old.createdAt : TS(), updatedAt: TS()
-        }));
+      onItems: function (cb, err) { return db.collectionGroup('items').onSnapshot(function (s) { cb(rows(s, true)); }, err); },
+      saveInvoice: function (id, header, writes, removes, old) {
+        var b = db.batch();
+        b.set(inv.doc(id), Object.assign({}, header, { createdBy: old ? old.createdBy : me, createdAt: old && old.createdAt ? old.createdAt : TS(), updatedAt: TS() }));
+        writes.forEach(function (w) { b.set(itemRef(id, w.k), Object.assign({}, w.data, { approvals: {}, status: 'pending' })); });
+        removes.forEach(function (k) { b.delete(itemRef(id, k)); });
+        return b.commit();
       },
-      deleteInvoice: function (id) { return inv.doc(id).delete(); },
-      approve: function (id) { return inv.doc(id).update(new FP('approvals', me), TS()); },
-      unapprove: function (id) { return inv.doc(id).update(new FP('approvals', me), FV.delete()); },
-      tryApply: function (id) {
-        var ref = inv.doc(id);
+      deleteInvoice: function (id, pendingKeys) {
+        var b = db.batch();
+        pendingKeys.forEach(function (k) { b.delete(itemRef(id, k)); });
+        b.delete(inv.doc(id));
+        return b.commit();
+      },
+      approveItems: function (iid, pids) {
+        var b = db.batch();
+        pids.forEach(function (pid) { b.update(itemRef(iid, pid), new FP('approvals', me), TS()); });
+        return b.commit();
+      },
+      unapproveItem: function (iid, pid) { return itemRef(iid, pid).update(new FP('approvals', me), FV.delete()); },
+      tryApplyItem: function (iid, pid) {
+        var ref = itemRef(iid, pid);
         return db.runTransaction(function (tx) {
           return tx.get(ref).then(function (s) {
             if (!s.exists) return false;
-            var d = s.data();
-            if (d.status !== 'pending') return false;
-            var appr = Object.assign({}, d.approvals || {});
-            if (!appr[me]) appr[me] = TS();
+            var it = s.data();
+            if (it.status !== 'pending') return false;
+            var appr = Object.assign({}, it.approvals || {});
+            if (isP && !appr[me]) appr[me] = TS();
             if (!partners.every(function (p) { return appr[p]; })) return false;
             tx.update(ref, { approvals: appr, status: 'applied', appliedAt: TS() });
-            Object.keys(d.items || {}).forEach(function (pid) {
-              var it = d.items[pid];
-              tx.set(prod.doc(pid), { name: it.name, cost: it.cost, srp: it.srp, dealer: it.dealer, disc1: it.disc1, disc2: it.disc2, lastInvoice: id, updatedAt: TS() });
-            });
+            tx.set(prod.doc(pid), { name: it.name, cost: it.cost, srp: it.srp, dealer: it.dealer, disc1: it.disc1, disc2: it.disc2, lastInvoice: iid, updatedAt: TS() });
             return true;
           });
         });
@@ -458,8 +511,8 @@ button:disabled { opacity: 0.55; cursor: default; }
 
   /* ---------- start ---------- */
   function start(api) {
-    S.api = api; S.me = api.me; S.partners = api.partners;
-    $('#who-email').textContent = api.me;
+    S.api = api; S.me = api.me; S.partners = api.partners; S.isPartner = api.partners.indexOf(api.me) >= 0;
+    $('#who-email').textContent = api.me + (S.isPartner ? '' : ' (tender)');
     showScreen('main');
     S.unsub.push(api.onProducts(function (list) {
       S.products = list.map(normProduct).sort(function (a, b) { return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }); });
@@ -468,7 +521,13 @@ button:disabled { opacity: 0.55; cursor: default; }
     }, fail));
     S.unsub.push(api.onInvoices(function (list) {
       S.invoices = list.sort(function (a, b) { return ms(b.createdAt) - ms(a.createdAt); });
-      S.loadedI = true;
+      S.loadedI = true; refresh();
+    }, fail));
+    S.unsub.push(api.onItems(function (list) {
+      var m = {};
+      list.forEach(function (x) { (m[x.iid] = m[x.iid] || []).push(normItem(x)); });
+      Object.keys(m).forEach(function (k) { m[k].sort(function (a, b) { return a.order - b.order; }); });
+      S.items = m; S.loadedT = true;
       autoApply(); refresh();
     }, fail));
     renderView();
@@ -477,22 +536,31 @@ button:disabled { opacity: 0.55; cursor: default; }
     return { id: x.id, name: String(x.name || ''), cost: num(x.cost), srp: num(x.srp), dealer: num(x.dealer),
       disc1: x.disc1 == null ? 10 : num(x.disc1), disc2: x.disc2 == null ? 15 : num(x.disc2), lastInvoice: x.lastInvoice || '', updatedAt: x.updatedAt };
   }
-  function itemsOf(inv) {
-    var it = inv.items || {};
-    return Object.keys(it).map(function (k) { var x = it[k]; return { k: k, name: x.name, qty: num(x.qty), cost: num(x.cost), srp: num(x.srp), dealer: num(x.dealer), disc1: num(x.disc1), disc2: num(x.disc2), order: num(x.order) }; })
-      .sort(function (a, b) { return a.order - b.order; });
+  function normItem(x) {
+    return { k: x.id, iid: x.iid, name: String(x.name || ''), qty: num(x.qty), cost: num(x.cost), srp: num(x.srp), dealer: num(x.dealer),
+      disc1: num(x.disc1), disc2: num(x.disc2), order: num(x.order), approvals: x.approvals || {}, status: x.status || 'pending', appliedAt: x.appliedAt };
   }
-  function approvedBy(inv, e) { return !!(inv.approvals && inv.approvals[e]); }
-  function allApproved(inv) { return S.partners.every(function (p) { return approvedBy(inv, p); }); }
+  function itemsOf(inv) { return (S.items[inv.id] || []); }
+  function approvedBy(it, e) { return !!(it.approvals && it.approvals[e]); }
+  function allApproved(it) { return S.partners.every(function (p) { return approvedBy(it, p); }); }
+  function invState(inv) {
+    var its = itemsOf(inv), done = its.filter(function (i) { return i.status === 'applied'; }).length;
+    return { total: its.length, done: done, open: its.length ? done < its.length : !S.loadedT || true, items: its };
+  }
+  function isOpen(inv) { var its = itemsOf(inv); return !its.length || its.some(function (i) { return i.status !== 'applied'; }); }
   function autoApply() {
-    S.invoices.forEach(function (inv) {
-      if (inv.status === 'pending' && allApproved(inv) && !S.tried.has(inv.id)) {
-        S.tried.add(inv.id);
-        S.api.tryApply(inv.id).then(function (ok) { if (ok) setStatus('Na-approve na sang duha. Na-update na ang presyo.'); }, function () {});
-      }
+    Object.keys(S.items).forEach(function (iid) {
+      S.items[iid].forEach(function (it) {
+        var key = iid + '/' + it.k;
+        if (it.status === 'pending' && allApproved(it) && !S.tried.has(key)) {
+          S.tried.add(key);
+          S.api.tryApplyItem(iid, it.k).then(function (ok) { if (ok) setStatus('Na-approve sang duha ang ' + it.name + '. Na-update na ang presyo.'); }, function () {});
+        }
+      });
     });
   }
-  function waitingForMe() { return S.invoices.filter(function (i) { return i.status === 'pending' && !approvedBy(i, S.me); }); }
+  function myPending(inv) { return itemsOf(inv).filter(function (i) { return i.status === 'pending' && !approvedBy(i, S.me); }); }
+  function waitingForMe() { return S.isPartner ? S.invoices.filter(function (i) { return myPending(i).length; }) : []; }
 
   function refresh() {
     var w = waitingForMe().length;
@@ -504,7 +572,7 @@ button:disabled { opacity: 0.55; cursor: default; }
   }
   function renderBanner() {
     var b = $('#banner'), w = waitingForMe(), html = '';
-    if (w.length && S.view !== 'detail') html += '<div class="banner"><span>' + w.length + ' ka resibo ang naghulat sang approval mo.</span><button type="button" data-open="' + esc(w[0].id) + '">Tan-awa</button></div>';
+    if (w.length && S.view !== 'detail') html += '<div class="banner"><span>' + w.length + ' ka resibo ang may item nga naghulat sang approval mo.</span><button type="button" data-open="' + esc(w[0].id) + '">Tan-awa</button></div>';
     var old = lsGet(OLD_LIST_KEY, []);
     if (S.loadedP && S.loadedI && Array.isArray(old) && old.length && !lsGet(OLD_DONE_KEY, false))
       html += '<div class="banner"><span>May ' + old.length + ' ka produkto sa sini nga cellphone halin sa daan nga app.</span><button type="button" id="import-old">Himua nga resibo</button></div>';
@@ -519,10 +587,9 @@ button:disabled { opacity: 0.55; cursor: default; }
   /* ---------- navigation ---------- */
   document.querySelector('.tabs').addEventListener('click', function (e) {
     var t = e.target.closest('[data-go]');
-    if (t) { if (S.view === 'edit' && !leaveEditor()) return; S.view = t.getAttribute('data-go'); renderView(); window.scrollTo(0, 0); }
+    if (t) { E = null; S.view = t.getAttribute('data-go'); renderView(); renderBanner(); window.scrollTo(0, 0); }
   });
-  $('#new-inv').addEventListener('click', function () { if (S.view === 'edit' && !leaveEditor()) return; openEditor(null); });
-  function leaveEditor() { E = null; return true; }
+  $('#new-inv').addEventListener('click', function () { openEditor(null); });
   function openDetail(id) { S.openId = id; S.view = 'detail'; renderView(); renderBanner(); window.scrollTo(0, 0); }
 
   function renderView() {
@@ -536,14 +603,30 @@ button:disabled { opacity: 0.55; cursor: default; }
     else if (S.view === 'edit') viewEditor();
   }
 
+  /* ---------- horizontal price table ---------- */
+  function cell(price, profit, cost, extra) {
+    var cls = profit < 0 ? 'is-loss' : profit === 0 ? 'is-zero' : '';
+    var txt = profit < 0 ? 'lugi ' + peso(-profit) : profit === 0 ? 'wala tubo' : 'tubo ' + peso(profit) + ' · ' + pct(pctOf(profit, cost));
+    return '<td class="' + cls + '"><b>' + peso(price) + '</b>' + (extra ? '<small>' + extra + '</small>' : '') + '<small class="tp">' + txt + '</small></td>';
+  }
+  function priceCells(p) {
+    var srpP = r2(p.cost + p.srp);
+    return '<td><b>' + peso(p.cost) + '</b></td>' +
+      cell(srpP, p.srp, p.cost) +
+      cell(r2(srpP - p.disc1), r2(p.srp - p.disc1), p.cost, 'less ₱' + plain(p.disc1)) +
+      cell(r2(srpP - p.disc2), r2(p.srp - p.disc2), p.cost, 'less ₱' + plain(p.disc2)) +
+      cell(r2(p.cost + p.dealer), p.dealer, p.cost);
+  }
+  var PRICE_HEAD = '<th scope="col">Puhunan</th><th scope="col">SRP</th><th scope="col">Kasagaran</th><th scope="col">Suki</th><th scope="col">Dealer</th>';
+
   /* ---------- Presyo (approved list) ---------- */
   function viewProducts() {
     var q = $('#psearch') ? $('#psearch').value : '';
     V.innerHTML = '<div class="list-title"><h2>Opisyal nga presyo</h2><span class="muted" id="pcount"></span></div>' +
       '<label class="field"><span>Pangitaa</span><span class="box"><input id="psearch" type="search" autocomplete="off" placeholder="I-type ang ngalan sang produkto"></span></label>' +
-      '<div class="list" id="plist"></div>' +
-      '<section class="panel"><h3>Backup</h3><p class="lede">Ang presyo naka-save sa database ninyo. Mag-download sang backup para may kopya ka sa cellphone, ukon ibalik ang backup bilang bag-o nga resibo.</p>' +
-      '<div class="row"><button type="button" id="bk-save">I-download ang backup</button><label class="small" style="display:inline-flex"><button type="button" id="bk-pick">Ibalik halin sa backup</button></label><input type="file" id="bk-file" accept="application/json,.json" hidden></div>' +
+      '<div id="plist"></div>' +
+      '<section class="panel"><h3>Backup</h3><p class="lede">Ang presyo naka-save sa database ninyo. Mag-download sang backup para may kopya ka, ukon ibalik ang backup bilang bag-o nga resibo.</p>' +
+      '<div class="row"><button type="button" id="bk-save">I-download ang backup</button><button type="button" id="bk-pick">Ibalik halin sa backup</button><input type="file" id="bk-file" accept="application/json,.json" hidden></div>' +
       '<p class="muted" id="bk-msg" role="status"></p></section>';
     $('#psearch').value = q;
     $('#psearch').addEventListener('input', paintProductsList);
@@ -569,24 +652,24 @@ button:disabled { opacity: 0.55; cursor: default; }
     if (!S.products.length) { list.innerHTML = '<p class="note">Wala pa sang opisyal nga presyo. Pinduta ang "+ Bag-o nga resibo", i-encode ang mga produkto, kag aprubahan ninyo nga duha.</p>'; return; }
     if (!shown.length) { list.innerHTML = '<p class="note">Wala sang produkto nga may "' + esc(q) + '" sa ngalan.</p>'; return; }
     var rv = lsGet(RIVAL_KEY, {});
-    list.innerHTML = shown.map(function (p) {
-      var inv = S.invoices.find(function (i) { return i.id === p.lastInvoice; });
-      return '<article class="card"><div class="card-head"><h3 class="pname">' + esc(p.name) + '</h3><span class="muted">Puhunan ' + peso(p.cost) + '</span></div>' +
-        rowsHtml(p) +
-        (inv ? '<p class="src">Halin sa resibo: ' + esc(inv.supplier || '') + (inv.invoiceNo ? ' #' + esc(inv.invoiceNo) : '') + (inv.date ? ' · ' + esc(fmtDate(inv.date)) : '') + '</p>' : '') +
-        '<div class="rival"><label class="field"><span>Presyo sang kontra</span><span class="box"><i>₱</i><input id="rival-' + esc(p.id) + '" data-rival="' + esc(p.id) + '" type="text" inputmode="decimal" autocomplete="off" placeholder="wala pa" value="' + (rv[p.id] ? plain(rv[p.id]) : '') + '"></span></label><p data-rival-out="' + esc(p.id) + '"></p></div>' +
-        '</article>';
-    }).join('');
+    list.innerHTML = '<div class="tbl-wrap"><table><thead><tr><th scope="col">Produkto</th>' + PRICE_HEAD + '<th scope="col">Presyo sang kontra</th></tr></thead><tbody>' +
+      shown.map(function (p) {
+        var inv = S.invoices.find(function (i) { return i.id === p.lastInvoice; });
+        return '<tr><th scope="row"><span class="tn">' + esc(p.name) + '</span>' +
+          (inv ? '<small>' + esc(inv.supplier || '') + (inv.date ? ' · ' + esc(fmtDate(inv.date)) : '') + '</small>' : '') + '</th>' +
+          priceCells(p) +
+          '<td class="rv"><span class="box"><i>₱</i><input id="rival-' + esc(p.id) + '" data-rival="' + esc(p.id) + '" type="text" inputmode="decimal" autocomplete="off" placeholder="wala pa" aria-label="Presyo sang kontra para sa ' + esc(p.name) + '" value="' + (rv[p.id] ? plain(rv[p.id]) : '') + '"></span><small data-rival-out="' + esc(p.id) + '"></small></td></tr>';
+      }).join('') + '</tbody></table></div><p class="muted hint">I-swipe pa-wala para makita ang tanan nga column. Ang presyo sang kontra sa sini lang nga device naka-save.</p>';
     shown.forEach(function (p) { paintRival(p.id); });
   }
   function paintRival(pid) {
     var p = S.byId.get(pid), o = V.querySelector('[data-rival-out="' + CSS.escape(pid) + '"]');
     if (!p || !o) return;
     var r = lsGet(RIVAL_KEY, {})[pid];
-    if (!r) { o.className = ''; o.textContent = 'Sa sini lang nga cellphone ini. Makita mo kung may tubo ka pa kung sundon ang ila presyo.'; return; }
+    if (!r) { o.className = ''; o.textContent = ''; return; }
     var t = r2(r - p.cost);
     o.className = t < 0 ? 'is-loss' : '';
-    o.textContent = t < 0 ? 'Kung sundon mo, lugi ka sang ' + peso(-t) + ' kada isa.' : t === 0 ? 'Kung sundon mo, balik puhunan lang.' : 'Kung sundon mo, tubo ' + peso(t) + ' · ' + pct(pctOf(t, p.cost)) + '.';
+    o.textContent = t < 0 ? 'lugi ' + peso(-t) : t === 0 ? 'balik puhunan' : 'tubo ' + peso(t) + ' · ' + pct(pctOf(t, p.cost));
   }
   function downloadBackup() {
     var data = JSON.stringify({ app: 'exotica-sales-pricing', savedAt: new Date().toISOString(), products: S.products.map(function (p) { return { id: p.id, name: p.name, cost: p.cost, srp: p.srp, dealer: p.dealer, disc1: p.disc1, disc2: p.disc2 }; }) }, null, 1);
@@ -608,7 +691,6 @@ button:disabled { opacity: 0.55; cursor: default; }
     };
     r.readAsText(f);
   }
-  /* old list or backup -> a pending invoice that both partners approve */
   function importRows(arr, label) {
     var items = [];
     arr.forEach(function (x) {
@@ -625,78 +707,104 @@ button:disabled { opacity: 0.55; cursor: default; }
 
   /* ---------- Resibo list ---------- */
   function statusChip(inv) {
-    if (inv.status === 'applied') return '<span class="chip ok">Na-apply</span>';
-    var n = S.partners.filter(function (p) { return approvedBy(inv, p); }).length;
-    if (n && !approvedBy(inv, S.me)) return '<span class="chip">Ikaw na lang ang wala ka-approve</span>';
-    return '<span class="chip">Naghulat: ' + n + '/' + S.partners.length + '</span>';
+    var st = invState(inv);
+    if (!st.total) return '<span class="chip wait">Wala item</span>';
+    if (st.done === st.total) return '<span class="chip ok">Na-apply tanan</span>';
+    var mine = myPending(inv).length;
+    if (S.isPartner && mine) return '<span class="chip">' + mine + ' ka item naghulat sa imo</span>';
+    return '<span class="chip">' + st.done + '/' + st.total + ' na-apply</span>';
   }
   function viewInvoices() {
-    var pend = S.invoices.filter(function (i) { return i.status === 'pending'; }), done = S.invoices.filter(function (i) { return i.status !== 'pending'; });
+    var open = S.invoices.filter(isOpen), done = S.invoices.filter(function (i) { return !isOpen(i); });
     function row(i) {
-      var n = Object.keys(i.items || {}).length;
+      var n = itemsOf(i).length;
       return '<button type="button" class="inv card" data-open="' + esc(i.id) + '"><span class="inv-top"><strong>' + esc(i.supplier || 'Resibo') + (i.invoiceNo ? ' #' + esc(i.invoiceNo) : '') + '</strong>' + statusChip(i) + '</span>' +
         '<span class="muted">' + esc(fmtDate(i.date)) + ' · ' + n + ' ka produkto · gin-encode ni ' + esc(who(i.createdBy)) + '</span></button>';
     }
     V.innerHTML = '<div class="list-title"><h2>Mga resibo</h2></div>' +
       (!S.loadedI ? '<p class="note">Ginakarga…</p>' : !S.invoices.length ? '<p class="note">Wala pa sang resibo. Kung may bag-o nga abot nga stocks, pinduta ang "+ Bag-o nga resibo".</p>' :
-        (pend.length ? '<h3>Naghulat sang approval</h3><div class="list">' + pend.map(row).join('') + '</div>' : '') +
-        (done.length ? '<h3>Na-apply na</h3><div class="list">' + done.slice(0, 50).map(row).join('') + '</div>' : ''));
+        (open.length ? '<h3>May naghulat sang approval</h3><div class="list">' + open.map(row).join('') + '</div>' : '') +
+        (done.length ? '<h3>Na-apply na tanan</h3><div class="list">' + done.slice(0, 50).map(row).join('') + '</div>' : ''));
     V.querySelectorAll('[data-open]').forEach(function (b) { b.addEventListener('click', function () { openDetail(b.getAttribute('data-open')); }); });
   }
 
-  /* ---------- Resibo detail + approval ---------- */
+  /* ---------- Resibo detail: one row per item, approve per item ---------- */
+  function approvalCell(it) {
+    var marks = S.partners.map(function (p) {
+      var ok = approvedBy(it, p);
+      return '<span class="mk ' + (ok ? 'ok' : '') + '" title="' + esc(p) + '">' + (ok ? '✓ ' : '… ') + esc(who(p)) + '</span>';
+    }).join('');
+    var btn = '';
+    if (it.status === 'applied') btn = '<span class="chip ok">Na-apply</span>';
+    else if (S.isPartner) btn = approvedBy(it, S.me)
+      ? '<button type="button" class="small" data-unapprove="' + esc(it.k) + '">Bawion</button>'
+      : '<button type="button" class="thumb sm" data-approve="' + esc(it.k) + '">👍 Aprubahan</button>';
+    return '<td class="ap">' + btn + '<span class="mks">' + marks + '</span></td>';
+  }
   function viewDetail() {
     var inv = S.invoices.find(function (i) { return i.id === S.openId; });
     if (!inv) { V.innerHTML = '<button type="button" class="small" id="back">← Mga resibo</button><p class="note">' + (S.loadedI ? 'Wala na ini nga resibo.' : 'Ginakarga…') + '</p>'; $('#back').addEventListener('click', function () { S.view = 'invoices'; renderView(); }); return; }
-    var pending = inv.status === 'pending', mine = approvedBy(inv, S.me);
-    var chips = S.partners.map(function (p) {
-      var ok = approvedBy(inv, p);
-      return '<span class="chip ' + (ok ? 'ok' : 'wait') + '">' + (ok ? '✓ ' : '… ') + esc(who(p)) + (p === S.me ? ' (ikaw)' : '') + '</span>';
-    }).join('');
-    var items = itemsOf(inv).map(function (it) {
-      var old = S.byId.get(it.k), w = warnings(it), ch = '';
-      if (pending && old) {
-        var d = r2(it.cost - old.cost);
-        ch = '<p class="change">Dati: puhunan ' + peso(old.cost) + ', SRP ' + peso(old.cost + old.srp) + (d ? ' · puhunan ' + (d > 0 ? 'nagsaka sang ' + peso(d) : 'nagnubo sang ' + peso(-d)) : '') + '</p>';
+    var its = itemsOf(inv), mine = myPending(inv), anyApplied = its.some(function (i) { return i.status === 'applied'; });
+    var canDel = !anyApplied && (S.isPartner || inv.createdBy === S.me);
+    var hasPending = its.some(function (i) { return i.status === 'pending'; }) || !its.length;
+    var rows = its.map(function (it) {
+      var old = S.byId.get(it.k), w = warnings(it), sub = '';
+      if (it.status === 'pending') {
+        if (old) { var d = r2(it.cost - old.cost); sub = 'Dati: puhunan ' + peso(old.cost) + ', SRP ' + peso(old.cost + old.srp) + (d ? (d > 0 ? ' · nagsaka ' + peso(d) : ' · nagnubo ' + peso(-d)) : ''); }
+        else sub = 'Bag-o nga produkto';
       }
-      return '<article class="card"><div class="card-head"><h3 class="pname">' + esc(it.name) + '</h3>' +
-        (pending ? (old ? '<span class="tag">Dati na</span>' : '<span class="tag new">Bag-o</span>') : '') + '</div>' +
-        '<p class="muted">Puhunan ' + peso(it.cost) + (it.qty ? ' · Dami: ' + plain(it.qty) : '') + '</p>' + ch + rowsHtml(it) +
-        w.map(function (x) { return '<p class="bad">' + esc(x) + '</p>'; }).join('') + '</article>';
+      return '<tr class="' + (it.status === 'applied' ? 'done' : '') + '"><th scope="row"><span class="tn">' + esc(it.name) + '</span>' +
+        (it.qty ? '<small>Dami: ' + plain(it.qty) + '</small>' : '') + (sub ? '<small>' + esc(sub) + '</small>' : '') +
+        w.map(function (x) { return '<small class="bad">' + esc(x) + '</small>'; }).join('') + '</th>' +
+        priceCells(it) + approvalCell(it) + '</tr>';
     }).join('');
-    var acts = '';
-    if (pending) {
-      acts = '<div class="actions">' + (mine ? '<button type="button" id="unapprove">Bawion ang approval ko</button>' : '<button type="button" class="thumb" id="approve">👍 Aprubahan</button>') +
-        '<button type="button" id="edit">Ilisan</button><button type="button" class="danger" id="del">Dulaon</button>' +
-        '<span class="confirm" id="del-confirm" hidden><button type="button" class="danger" id="del-yes">Huo, dulaon</button><button type="button" id="del-no">Indi</button></span></div>' +
-        '<p class="muted">Kung ilisan ang resibo, mabalik sa zero ang approval. Pag-approve ninyo nga duha, automatic nga ma-update ang opisyal nga presyo.</p>';
-    } else {
-      acts = '<p class="chip ok">Na-apply sa opisyal nga presyo' + (inv.appliedAt ? ' sang ' + new Date(ms(inv.appliedAt)).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '') + '</p>';
-    }
+    var acts = '<div class="actions">' +
+      (S.isPartner && mine.length ? '<button type="button" class="thumb" id="approve-all">👍 Aprubahan tanan (' + mine.length + ')</button>' : '') +
+      (hasPending ? '<button type="button" id="edit">Ilisan</button>' : '') +
+      (canDel ? '<button type="button" class="danger" id="del">Dulaon</button><span class="confirm" id="del-confirm" hidden><button type="button" class="danger" id="del-yes">Huo, dulaon</button><button type="button" id="del-no">Indi</button></span>' : '') +
+      '</div>' +
+      (S.isPartner ? '<p class="muted">Ang kada item may kaugalingon nga approval. Pag-approve ninyo nga duha sa isa ka item, ma-update dayon ang presyo sina nga item.</p>'
+        : '<p class="warn">Ang duha ka partner lang ang maka-approve. Hambali sila nga may resibo nga naghulat.</p>');
     V.innerHTML = '<div class="row"><button type="button" class="small" id="back">← Mga resibo</button></div>' +
       '<div class="card-head"><h2>' + esc(inv.supplier || 'Resibo') + (inv.invoiceNo ? ' #' + esc(inv.invoiceNo) : '') + '</h2>' + statusChip(inv) + '</div>' +
-      '<p class="muted">' + esc(fmtDate(inv.date)) + ' · gin-encode ni ' + esc(who(inv.createdBy)) + '</p>' +
-      '<div class="chips">' + chips + '</div>' + acts + '<div class="list">' + items + '</div>' + (pending && itemsOf(inv).length > 3 ? acts.replace(/id="/g, 'data-dup="') : '');
+      '<p class="muted">' + esc(fmtDate(inv.date)) + ' · gin-encode ni ' + esc(who(inv.createdBy)) + '</p>' + acts +
+      (its.length ? '<div class="tbl-wrap"><table class="detail"><thead><tr><th scope="col">Produkto</th>' + PRICE_HEAD + '<th scope="col">Approval</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="muted hint">I-swipe pa-wala para makita ang tanan nga column.</p>'
+        : '<p class="note">' + (S.loadedT ? (inv.items ? 'Ini nga resibo halin sa daan nga version sang app. Dulaa kag i-encode liwat.' : 'Wala pa sang item ini nga resibo.') : 'Ginakarga…') + '</p>');
     $('#back').addEventListener('click', function () { S.view = 'invoices'; renderView(); renderBanner(); });
-    function on(id, fn) { V.querySelectorAll('#' + id + ', [data-dup="' + id + '"]').forEach(function (b) { b.addEventListener('click', fn); }); }
-    on('approve', function () {
+    function on(sel, fn) { var el = V.querySelector(sel); if (el) el.addEventListener('click', fn); }
+    on('#approve-all', function () {
       this.disabled = true;
-      var others = S.partners.filter(function (p) { return p !== S.me; }).every(function (p) { return approvedBy(inv, p); });
-      var job = others ? S.api.tryApply(inv.id).then(function (ok) { if (ok) setStatus('Na-approve na sang duha. Na-update na ang presyo.'); }) : S.api.approve(inv.id).then(function () { setStatus('Na-approve mo na. Naghulat na lang sang partner mo.'); });
-      job.catch(fail);
+      S.api.approveItems(inv.id, mine.map(function (i) { return i.k; })).then(function () { setStatus('Na-approve mo ang ' + mine.length + ' ka item.'); }, fail);
     });
-    on('unapprove', function () { S.api.unapprove(inv.id).then(function () { setStatus('Gin-bawi mo ang approval mo.'); }, fail); });
-    on('edit', function () { openEditor(inv); });
-    on('del', function () { V.querySelectorAll('#del-confirm, [data-dup="del-confirm"]').forEach(function (c) { c.hidden = false; }); });
-    on('del-no', function () { V.querySelectorAll('#del-confirm, [data-dup="del-confirm"]').forEach(function (c) { c.hidden = true; }); });
-    on('del-yes', function () { S.api.deleteInvoice(inv.id).then(function () { setStatus('Gindula ang resibo.'); }, fail); S.view = 'invoices'; renderView(); });
+    V.querySelector('tbody') && V.querySelector('tbody').addEventListener('click', function (e) {
+      var a = e.target.closest('[data-approve]'), u = e.target.closest('[data-unapprove]');
+      if (a) {
+        a.disabled = true;
+        var pid = a.getAttribute('data-approve'), it = its.find(function (x) { return x.k === pid; });
+        var others = S.partners.filter(function (p) { return p !== S.me; }).every(function (p) { return approvedBy(it, p); });
+        (others ? S.api.tryApplyItem(inv.id, pid).then(function (ok) { if (ok) setStatus('Na-approve sang duha ang ' + it.name + '. Na-update na ang presyo.'); })
+          : S.api.approveItems(inv.id, [pid]).then(function () { setStatus('Na-approve mo ang ' + it.name + '. Naghulat na lang sang partner mo.'); })).catch(fail);
+      }
+      if (u) S.api.unapproveItem(inv.id, u.getAttribute('data-unapprove')).then(function () { setStatus('Gin-bawi mo ang approval mo.'); }, fail);
+    });
+    on('#edit', function () { openEditor(inv); });
+    on('#del', function () { $('#del-confirm').hidden = false; });
+    on('#del-no', function () { $('#del-confirm').hidden = true; });
+    on('#del-yes', function () {
+      S.api.deleteInvoice(inv.id, its.filter(function (i) { return i.status === 'pending'; }).map(function (i) { return i.k; })).then(function () { setStatus('Gindula ang resibo.'); }, fail);
+      S.view = 'invoices'; renderView();
+    });
   }
 
   /* ---------- Resibo editor ---------- */
   function openEditor(inv, draft) {
     var src = inv || draft;
+    var cur = inv ? itemsOf(inv) : [];
+    var pend = cur.filter(function (i) { return i.status === 'pending'; }).map(function (i) { var c = Object.assign({}, i); c.orig = i; return c; });
     E = { id: inv ? inv.id : null, old: inv || null, supplier: src ? src.supplier || '' : '', invoiceNo: src ? src.invoiceNo || '' : '', date: src ? src.date || today() : today(),
-      items: inv ? itemsOf(inv) : draft ? draft.items : [blankItem()] };
+      locked: cur.filter(function (i) { return i.status === 'applied'; }),
+      origKeys: pend.map(function (i) { return i.k; }),
+      items: inv ? (pend.length ? pend : [blankItem()]) : draft ? draft.items : [blankItem()] };
     S.view = 'edit'; renderView(); renderBanner(); window.scrollTo(0, 0);
   }
   function blankItem() { return { k: S.api.newProductId(), name: '', qty: 0, cost: 0, srp: 0, dealer: 0, disc1: 10, disc2: 15 }; }
@@ -728,7 +836,8 @@ button:disabled { opacity: 0.55; cursor: default; }
   function viewEditor() {
     V.innerHTML = '<div class="row"><button type="button" class="small" id="ed-back">← Balik</button></div>' +
       '<h2>' + (E.id ? 'Ilisan ang resibo' : 'Bag-o nga resibo') + '</h2>' +
-      (E.id ? '<p class="warn">Kung i-save, mabalik sa zero ang approval kag kinahanglan liwat mag-approve kamo nga duha.</p>' : '') +
+      (E.id ? '<p class="warn">Ang item nga ilisan mo, mabalik sa zero ang approval sina. Ang wala ginilisan, indi maapektuhan.</p>' : '') +
+      (E.locked && E.locked.length ? '<p class="muted">Na-apply na kag indi na mailisan: ' + E.locked.map(function (i) { return esc(i.name); }).join(', ') + '.</p>' : '') +
       '<div class="grid3"><label class="field wide"><span>Supplier</span><span class="box"><input id="ed-supplier" type="text" autocomplete="off" placeholder="Ngalan sang supplier"></span></label>' +
       '<label class="field"><span>Invoice no.</span><span class="box"><input id="ed-no" type="text" autocomplete="off"></span></label>' +
       '<label class="field"><span>Petsa</span><span class="box"><input id="ed-date" type="date"></span></label></div>' +
@@ -779,7 +888,7 @@ button:disabled { opacity: 0.55; cursor: default; }
     var it = itemFor(c), name = (it.name || '').trim().toLowerCase();
     var p = S.products.find(function (x) { return x.name.toLowerCase() === name; });
     if (p && p.id !== it.k) {
-      if (E.items.some(function (x) { return x !== it && x.k === p.id; })) { $('#ed-err').textContent = 'Ara na ang ' + p.name + ' sa sini nga resibo.'; return; }
+      if (E.items.some(function (x) { return x !== it && x.k === p.id; }) || (E.locked || []).some(function (x) { return x.k === p.id; })) { $('#ed-err').textContent = 'Ara na ang ' + p.name + ' sa sini nga resibo.'; return; }
       var blank = !it.cost && !it.srp && !it.dealer;
       it.k = p.id; c.setAttribute('data-k', p.id);
       if (blank) { it.cost = p.cost; it.srp = p.srp; it.dealer = p.dealer; it.disc1 = p.disc1; it.disc2 = p.disc2; }
@@ -826,16 +935,22 @@ button:disabled { opacity: 0.55; cursor: default; }
       if (!n) bad = 'May produkto nga wala ngalan.';
       else if (!(it.cost > 0)) bad = 'Ibutang ang puhunan sang ' + n + '.';
       else if (names[key]) bad = 'Duha ka beses ang ' + n + ' sa resibo.';
+      else if ((E.locked || []).some(function (x) { return x.k === it.k || x.name.toLowerCase() === key; })) bad = 'Na-apply na ang ' + n + ' sa sini nga resibo. I-encode ini sa bag-o nga resibo.';
       names[key] = true;
     });
     err.textContent = bad;
     if (bad) return;
-    var map = {};
+    var base = (E.locked || []).length, writes = [], keep = {};
+    var FIELDS = ['name', 'qty', 'cost', 'srp', 'dealer', 'disc1', 'disc2', 'order'];
     items.forEach(function (it, i) {
-      map[it.k] = { name: it.name.trim(), qty: r2(it.qty || 0), cost: r2(it.cost), srp: r2(it.srp), dealer: r2(it.dealer), disc1: r2(it.disc1), disc2: r2(it.disc2), order: i };
+      var data = { name: it.name.trim(), qty: r2(it.qty || 0), cost: r2(it.cost), srp: r2(it.srp), dealer: r2(it.dealer), disc1: r2(it.disc1), disc2: r2(it.disc2), order: base + i };
+      keep[it.k] = true;
+      var o = it.orig && it.orig.k === it.k ? it.orig : null;
+      if (!o || FIELDS.some(function (f) { return o[f] !== data[f]; })) writes.push({ k: it.k, data: data });
     });
+    var removes = (E.origKeys || []).filter(function (k) { return !keep[k]; });
     var id = E.id || S.api.newInvoiceId(), old = E.old;
-    var job = S.api.saveInvoice(id, { supplier: E.supplier.trim(), invoiceNo: E.invoiceNo.trim(), date: E.date || today(), items: map }, old);
+    var job = S.api.saveInvoice(id, { supplier: E.supplier.trim(), invoiceNo: E.invoiceNo.trim(), date: E.date || today() }, writes, removes, old);
     setStatus('Gina-save ang resibo…');
     job.then(function () { setStatus('Na-save. Naghulat na sang approval ninyo nga duha.'); }, fail);
     E = null; openDetail(id);
@@ -855,7 +970,7 @@ button:disabled { opacity: 0.55; cursor: default; }
     firebase.auth().onAuthStateChanged(function (u) {
       if (!u) { if (started) location.reload(); else showLogin(cfg); return; }
       var email = String(u.email || '').toLowerCase();
-      if (cfg.partners.indexOf(email) < 0) { firebase.auth().signOut(); showLogin(cfg, 'Ang ' + email + ' wala sa lista sang partners.'); return; }
+      if (cfg.partners.concat(cfg.staff || []).indexOf(email) < 0) { firebase.auth().signOut(); showLogin(cfg, 'Ang ' + email + ' wala sa lista. Pangayo sang bag-o nga setup link sa partner.'); return; }
       if (started) return;
       started = true;
       start(makeFirebaseApi(db, email, cfg.partners));
